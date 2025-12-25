@@ -41,10 +41,10 @@ export const tierDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all tiers',
-				action: 'Get all tiers',
+				description: 'Retrieve many tiers',
+				action: 'Get many tiers',
 				routing: {
 					request: {
 						method: 'GET',

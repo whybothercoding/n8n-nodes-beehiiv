@@ -25,10 +25,10 @@ export const automationDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all automations',
-				action: 'Get all automations',
+				description: 'Retrieve many automations',
+				action: 'Get many automations',
 				routing: {
 					request: {
 						method: 'GET',

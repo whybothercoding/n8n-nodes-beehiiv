@@ -3,12 +3,15 @@ import {
 	ICredentialTestRequest,
 	ICredentialType,
 	INodeProperties,
+	Icon,
 } from 'n8n-workflow';
 
 export class BeehiivApi implements ICredentialType {
 	name = 'beehiivApi';
 	displayName = 'Beehiiv API';
 	documentationUrl = 'https://developers.beehiiv.com/docs/api/v2';
+	icon: Icon = 'file:../icons/beehiiv.svg';
+
 	properties: INodeProperties[] = [
 		{
 			displayName: 'API Key',

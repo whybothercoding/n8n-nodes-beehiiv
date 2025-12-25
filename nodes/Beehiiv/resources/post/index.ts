@@ -63,10 +63,10 @@ export const postDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all posts',
-				action: 'Get all posts',
+				description: 'Retrieve many posts',
+				action: 'Get many posts',
 				routing: {
 					request: {
 						method: 'GET',

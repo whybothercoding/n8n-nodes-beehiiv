@@ -53,10 +53,10 @@ export const webhookDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all webhooks',
-				action: 'Get all webhooks',
+				description: 'Retrieve many webhooks',
+				action: 'Get many webhooks',
 				routing: {
 					request: {
 						method: 'GET',
@@ -129,48 +129,28 @@ export const webhookDescription: INodeProperties[] = [
 		type: 'multiOptions',
 		options: [
 			{
-				name: 'Subscription Created',
-				value: 'subscription.created',
-			},
-			{
-				name: 'Subscription Activated',
-				value: 'subscription.activated',
-			},
-			{
-				name: 'Subscription Scubbed',
-				value: 'subscription.scrubbed',
-			},
-			{
-				name: 'Subscription Deleted',
-				value: 'subscription.deleted',
-			},
-			{
-				name: 'Subscription Unsubscribed',
-				value: 'subscription.unsubscribed',
-			},
-			{
-				name: 'Email Sent',
-				value: 'email.sent',
-			},
-			{
-				name: 'Email Delivered',
-				value: 'email.delivered',
-			},
-			{
-				name: 'Email Opened',
-				value: 'email.opened',
+				name: 'Email Bounced',
+				value: 'email.bounced',
 			},
 			{
 				name: 'Email Clicked',
 				value: 'email.clicked',
 			},
 			{
-				name: 'Email Bounced',
-				value: 'email.bounced',
+				name: 'Email Delivered',
+				value: 'email.delivered',
 			},
 			{
 				name: 'Email Marked as Spam',
 				value: 'email.marked_as_spam',
+			},
+			{
+				name: 'Email Opened',
+				value: 'email.opened',
+			},
+			{
+				name: 'Email Sent',
+				value: 'email.sent',
 			},
 			{
 				name: 'Post Published',
@@ -179,6 +159,26 @@ export const webhookDescription: INodeProperties[] = [
 			{
 				name: 'Post Sent',
 				value: 'post.sent',
+			},
+			{
+				name: 'Subscription Activated',
+				value: 'subscription.activated',
+			},
+			{
+				name: 'Subscription Created',
+				value: 'subscription.created',
+			},
+			{
+				name: 'Subscription Deleted',
+				value: 'subscription.deleted',
+			},
+			{
+				name: 'Subscription Scubbed',
+				value: 'subscription.scrubbed',
+			},
+			{
+				name: 'Subscription Unsubscribed',
+				value: 'subscription.unsubscribed',
 			},
 		],
 		displayOptions: {

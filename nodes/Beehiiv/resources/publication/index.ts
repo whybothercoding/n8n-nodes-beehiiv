@@ -13,10 +13,10 @@ export const publicationDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all publications',
-				action: 'Get all publications',
+				description: 'Retrieve many publications',
+				action: 'Get many publications',
 				routing: {
 					request: {
 						method: 'GET',

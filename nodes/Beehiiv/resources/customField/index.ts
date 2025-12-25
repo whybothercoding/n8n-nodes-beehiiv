@@ -53,10 +53,10 @@ export const customFieldDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all custom fields',
-				action: 'Get all custom fields',
+				description: 'Retrieve many custom fields',
+				action: 'Get many custom fields',
 				routing: {
 					request: {
 						method: 'GET',

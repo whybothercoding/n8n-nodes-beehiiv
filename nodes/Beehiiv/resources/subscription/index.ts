@@ -71,10 +71,10 @@ export const subscriptionDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all subscriptions',
-				action: 'Get all subscriptions',
+				description: 'Retrieve many subscriptions',
+				action: 'Get many subscriptions',
 				routing: {
 					request: {
 						method: 'GET',
@@ -131,6 +131,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		displayName: 'Email',
 		name: 'email',
 		type: 'string',
+		placeholder: 'name@email.com',
 		required: true,
 		displayOptions: {
 			show: {
@@ -191,7 +192,6 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'UTM source',
 	},
 	{
 		displayName: 'UTM Medium',
@@ -204,7 +204,6 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'UTM medium',
 	},
 	{
 		displayName: 'UTM Campaign',
@@ -217,7 +216,6 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'UTM campaign',
 	},
 	{
 		displayName: 'Referring Site',
@@ -230,7 +228,6 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'Referring site',
 	},
 	{
 		displayName: 'Referral Code',
@@ -243,6 +240,5 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
-		description: 'Referral code',
 	},
 ];

@@ -43,28 +43,28 @@ export class Beehiiv implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Publication',
-						value: 'publication',
-					},
-					{
-						name: 'Subscription',
-						value: 'subscription',
-					},
-					{
-						name: 'Post',
-						value: 'post',
+						name: 'Automation',
+						value: 'automation',
 					},
 					{
 						name: 'Custom Field',
 						value: 'customField',
 					},
 					{
+						name: 'Post',
+						value: 'post',
+					},
+					{
+						name: 'Publication',
+						value: 'publication',
+					},
+					{
 						name: 'Segment',
 						value: 'segment',
 					},
 					{
-						name: 'Automation',
-						value: 'automation',
+						name: 'Subscription',
+						value: 'subscription',
 					},
 					{
 						name: 'Tier',
@@ -86,5 +86,6 @@ export class Beehiiv implements INodeType {
 			...tierDescription,
 			...webhookDescription,
 		],
+		usableAsTool: true,
 	};
 }

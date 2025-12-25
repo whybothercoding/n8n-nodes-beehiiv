@@ -37,10 +37,10 @@ export const segmentDescription: INodeProperties[] = [
 				},
 			},
 			{
-				name: 'Get All',
+				name: 'Get Many',
 				value: 'getAll',
-				description: 'Retrieve all segments',
-				action: 'Get all segments',
+				description: 'Retrieve many segments',
+				action: 'Get many segments',
 				routing: {
 					request: {
 						method: 'GET',
