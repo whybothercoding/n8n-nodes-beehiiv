@@ -68,7 +68,7 @@ export const subscriptionDescription: INodeProperties[] = [
 				routing: {
 					request: {
 						method: 'GET',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{$parameter["email"]}}',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["email"])}}',
 					},
 				},
 			},
@@ -394,13 +394,12 @@ export const subscriptionDescription: INodeProperties[] = [
 	{
 		displayName: 'Tags',
 		name: 'tags',
-		type: 'string',
+		type: 'json',
 		displayOptions: {
 			show: { resource: ['subscription'], operation: ['create'] },
 		},
-		default: '',
-		description: 'Comma-separated list of tags to apply to the subscription',
-		placeholder: 'tag1,tag2',
+		default: '[]',
+		description: 'Array of tags to apply. Example: ["newsletter","vip"]',
 	},
 	{
 		displayName: 'Email to Update',

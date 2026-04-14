@@ -1,11 +1,11 @@
-import { customFieldDescription } from './resources/customField';
-import { referralProgramDescription } from './resources/referralProgram';
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
-import { subscriptionDescription } from './resources/subscription';
+import { automationDescription } from './resources/automation';
+import { customFieldDescription } from './resources/customField';
 import { postDescription } from './resources/post';
 import { publicationDescription } from './resources/publication';
+import { referralProgramDescription } from './resources/referralProgram';
 import { segmentDescription } from './resources/segment';
-import { automationDescription } from './resources/automation';
+import { subscriptionDescription } from './resources/subscription';
 import { tierDescription } from './resources/tier';
 import { webhookDescription } from './resources/webhook';
 
