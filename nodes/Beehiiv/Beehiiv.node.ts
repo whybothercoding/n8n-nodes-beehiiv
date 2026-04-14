@@ -1,4 +1,5 @@
 import { customFieldDescription } from './resources/customField';
+import { referralProgramDescription } from './resources/referralProgram';
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
 import { subscriptionDescription } from './resources/subscription';
 import { postDescription } from './resources/post';
@@ -59,6 +60,10 @@ export class Beehiiv implements INodeType {
 						value: 'publication',
 					},
 					{
+						name: 'Referral Program',
+						value: 'referralProgram',
+					},
+					{
 						name: 'Segment',
 						value: 'segment',
 					},
@@ -78,6 +83,7 @@ export class Beehiiv implements INodeType {
 				default: 'publication',
 			},
 			...publicationDescription,
+			...referralProgramDescription,
 			...subscriptionDescription,
 			...postDescription,
 			...customFieldDescription,
