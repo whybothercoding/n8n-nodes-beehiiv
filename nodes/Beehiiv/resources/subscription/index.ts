@@ -30,6 +30,8 @@ export const subscriptionDescription: INodeProperties[] = [
 							utm_campaign: '={{$parameter["utmCampaign"]}}',
 							referring_site: '={{$parameter["referringSite"]}}',
 							referral_code: '={{$parameter["referralCode"]}}',
+							custom_fields: '={{$parameter["customFields"]}}',
+							tags: '={{$parameter["tags"]}}',
 						},
 					},
 				},
@@ -92,7 +94,10 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'PATCH',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}',
 						body: {
+							email: '={{$parameter["updateEmail"]}}',
+							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
 							unsubscribe: '={{$parameter["unsubscribe"]}}',
+							custom_fields: '={{$parameter["customFields"]}}',
 						},
 					},
 				},
@@ -240,5 +245,58 @@ export const subscriptionDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
+	},
+	{
+		displayName: 'Update Email',
+		name: 'updateEmail',
+		type: 'string',
+		placeholder: 'name@email.com',
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['update'] },
+		},
+		default: '',
+		description: 'New email address for the subscriber',
+	},
+	{
+		displayName: 'Stripe Customer ID',
+		name: 'stripeCustomerId',
+		type: 'string',
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['update'] },
+		},
+		default: '',
+		description: 'Stripe customer ID to associate with this subscription',
+	},
+	{
+		displayName: 'Custom Fields',
+		name: 'customFields',
+		type: 'fixedCollection',
+		typeOptions: { multipleValues: true },
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['update', 'create'] },
+		},
+		default: {},
+		options: [
+			{
+				name: 'fields',
+				displayName: 'Field',
+				values: [
+					{ displayName: 'Name', name: 'name', type: 'string', default: '', description: 'Custom field name' },
+					{ displayName: 'Value', name: 'value', type: 'string', default: '', description: 'Custom field value' },
+				],
+			},
+		],
+		description: 'Custom fields to set on the subscription',
+	},
+	{
+		displayName: 'Tags',
+		name: 'tags',
+		type: 'string',
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['create'] },
+		},
+		default: '',
+		description: 'Comma-separated list of tags to apply to the subscription',
+		placeholder: 'tag1,tag2',
 	},
 ];
