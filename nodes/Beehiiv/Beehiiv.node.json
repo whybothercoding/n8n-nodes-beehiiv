@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-beehiiv.beehiiv",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Marketing"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://developers.beehiiv.com/docs/v2/api"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://developers.beehiiv.com/docs/v2/api"
+			}
+		]
+	}
+}
