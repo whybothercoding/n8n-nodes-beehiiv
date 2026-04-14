@@ -36,6 +36,45 @@ export const automationDescription: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'List Journeys',
+				value: 'listJourneys',
+				description: 'List journeys for an automation',
+				action: 'List automation journeys',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}/journeys',
+					},
+				},
+			},
+			{
+				name: 'Get Journey',
+				value: 'getJourney',
+				description: 'Get a specific journey within an automation',
+				action: 'Get an automation journey',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}/journeys/{{$parameter["journeyId"]}}',
+					},
+				},
+			},
+			{
+				name: 'Add Subscription',
+				value: 'addSubscription',
+				description: 'Add a subscription to an automation',
+				action: 'Add subscription to automation',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}/journeys',
+						body: {
+							subscription_id: '={{$parameter["subscriptionId"]}}',
+						},
+					},
+				},
+			},
 		],
 		default: 'getAll',
 	},
@@ -60,10 +99,32 @@ export const automationDescription: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['automation'],
-				operation: ['get'],
+				operation: ['get', 'listJourneys', 'getJourney', 'addSubscription'],
 			},
 		},
 		default: '',
 		description: 'The ID of the automation',
+	},
+	{
+		displayName: 'Journey ID',
+		name: 'journeyId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: { resource: ['automation'], operation: ['getJourney'] },
+		},
+		default: '',
+		description: 'The ID of the automation journey',
+	},
+	{
+		displayName: 'Subscription ID',
+		name: 'subscriptionId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: { resource: ['automation'], operation: ['addSubscription'] },
+		},
+		default: '',
+		description: 'The ID of the subscription to add to this automation',
 	},
 ];
