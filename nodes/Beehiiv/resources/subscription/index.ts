@@ -30,7 +30,7 @@ export const subscriptionDescription: INodeProperties[] = [
 							utm_campaign: '={{$parameter["utmCampaign"]}}',
 							referring_site: '={{$parameter["referringSite"]}}',
 							referral_code: '={{$parameter["referralCode"]}}',
-							custom_fields: '={{$parameter["customFields"]}}',
+							custom_fields: '={{$parameter["customFields"]["fields"]}}',
 							tags: '={{$parameter["tags"]}}',
 						},
 					},
@@ -91,13 +91,13 @@ export const subscriptionDescription: INodeProperties[] = [
 				action: 'Update a subscription',
 				routing: {
 					request: {
-						method: 'PATCH',
+						method: 'PUT',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}',
 						body: {
 							email: '={{$parameter["updateEmail"]}}',
 							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
 							unsubscribe: '={{$parameter["unsubscribe"]}}',
-							custom_fields: '={{$parameter["customFields"]}}',
+							custom_fields: '={{$parameter["customFields"]["fields"]}}',
 						},
 					},
 				},
