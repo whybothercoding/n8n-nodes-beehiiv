@@ -102,6 +102,109 @@ export const subscriptionDescription: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Update by Email',
+				value: 'updateByEmail',
+				description: 'Update a subscription by email address',
+				action: 'Update a subscription by email',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{$parameter["emailToUpdate"]}}',
+						body: {
+							email: '={{$parameter["updateEmail"]}}',
+							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
+							unsubscribe: '={{$parameter["unsubscribe"]}}',
+							custom_fields: '={{$parameter["customFields"]["fields"]}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Add Tag',
+				value: 'addTag',
+				description: 'Add a tag to a subscription',
+				action: 'Add a tag to a subscription',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}/tags',
+						body: {
+							tag: '={{$parameter["tag"]}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Bulk Create',
+				value: 'bulkCreate',
+				description: 'Create multiple subscriptions in bulk',
+				action: 'Bulk create subscriptions',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk',
+						body: {
+							subscriptions: '={{$parameter["subscriptions"]}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Bulk Update',
+				value: 'bulkUpdate',
+				description: 'Update multiple subscriptions in bulk',
+				action: 'Bulk update subscriptions',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk',
+						body: {
+							subscriptions: '={{$parameter["bulkUpdateItems"]}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'Bulk Update Status',
+				value: 'bulkUpdateStatus',
+				description: 'Update the status of multiple subscriptions',
+				action: 'Bulk update subscription status',
+				routing: {
+					request: {
+						method: 'PUT',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk/status',
+						body: {
+							subscription_ids: '={{$parameter["subscriptionIds"]}}',
+							status: '={{$parameter["bulkStatus"]}}',
+						},
+					},
+				},
+			},
+			{
+				name: 'List Bulk Updates',
+				value: 'listBulkUpdates',
+				description: 'Retrieve bulk subscription update records',
+				action: 'List bulk subscription updates',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/bulk_subscription_updates',
+					},
+				},
+			},
+			{
+				name: 'Get Bulk Update',
+				value: 'getBulkUpdate',
+				description: 'Get a specific bulk subscription update record',
+				action: 'Get a bulk subscription update',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/bulk_subscription_updates/{{$parameter["bulkUpdateId"]}}',
+					},
+				},
+			},
 		],
 		default: 'getAll',
 	},
@@ -126,7 +229,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['subscription'],
-				operation: ['get', 'delete', 'update'],
+				operation: ['get', 'delete', 'update', 'addTag'],
 			},
 		},
 		default: '',
@@ -154,7 +257,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['subscription'],
-				operation: ['update'],
+				operation: ['update', 'updateByEmail'],
 			},
 		},
 		default: false,
@@ -252,7 +355,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		type: 'string',
 		placeholder: 'name@email.com',
 		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update'] },
+			show: { resource: ['subscription'], operation: ['update', 'updateByEmail'] },
 		},
 		default: '',
 		description: 'New email address for the subscriber',
@@ -262,7 +365,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		name: 'stripeCustomerId',
 		type: 'string',
 		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update'] },
+			show: { resource: ['subscription'], operation: ['update', 'updateByEmail'] },
 		},
 		default: '',
 		description: 'Stripe customer ID to associate with this subscription',
@@ -273,7 +376,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		type: 'fixedCollection',
 		typeOptions: { multipleValues: true },
 		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update', 'create'] },
+			show: { resource: ['subscription'], operation: ['update', 'updateByEmail', 'create'] },
 		},
 		default: {},
 		options: [
@@ -298,5 +401,87 @@ export const subscriptionDescription: INodeProperties[] = [
 		default: '',
 		description: 'Comma-separated list of tags to apply to the subscription',
 		placeholder: 'tag1,tag2',
+	},
+	{
+		displayName: 'Email to Update',
+		name: 'emailToUpdate',
+		type: 'string',
+		placeholder: 'name@email.com',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['updateByEmail'] },
+		},
+		default: '',
+		description: 'The email address of the subscriber to update',
+	},
+	{
+		displayName: 'Tag',
+		name: 'tag',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['addTag'] },
+		},
+		default: '',
+		description: 'The tag to add to the subscription',
+	},
+	{
+		displayName: 'Subscriptions (JSON)',
+		name: 'subscriptions',
+		type: 'json',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['bulkCreate'] },
+		},
+		default: '[]',
+		description: 'Array of subscription objects to create. Each object should have at least an "email" field. Example: [{"email":"user@example.com","reactivate_existing":false}]',
+	},
+	{
+		displayName: 'Subscriptions (JSON)',
+		name: 'bulkUpdateItems',
+		type: 'json',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['bulkUpdate'] },
+		},
+		default: '[]',
+		description: 'Array of subscription update objects. Each must have a "subscription_id". Example: [{"subscription_id":"sub_123","email":"new@example.com"}]',
+	},
+	{
+		displayName: 'Subscription IDs',
+		name: 'subscriptionIds',
+		type: 'json',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['bulkUpdateStatus'] },
+		},
+		default: '[]',
+		description: 'Array of subscription IDs to update. Example: ["sub_abc123","sub_def456"]',
+	},
+	{
+		displayName: 'Status',
+		name: 'bulkStatus',
+		type: 'options',
+		options: [
+			{ name: 'Active', value: 'active' },
+			{ name: 'Inactive', value: 'inactive' },
+		],
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['bulkUpdateStatus'] },
+		},
+		default: 'active',
+		description: 'The status to set for the selected subscriptions',
+	},
+	{
+		displayName: 'Bulk Update ID',
+		name: 'bulkUpdateId',
+		type: 'string',
+		required: true,
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['getBulkUpdate'] },
+		},
+		default: '',
+		description: 'The ID of the bulk subscription update record',
 	},
 ];
