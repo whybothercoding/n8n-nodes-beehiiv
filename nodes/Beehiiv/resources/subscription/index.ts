@@ -110,7 +110,7 @@ export const subscriptionDescription: INodeProperties[] = [
 				routing: {
 					request: {
 						method: 'PUT',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{$parameter["emailToUpdate"]}}',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["emailToUpdate"])}}',
 						body: {
 							email: '={{$parameter["updateEmail"]}}',
 							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
