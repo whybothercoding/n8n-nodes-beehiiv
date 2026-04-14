@@ -24,6 +24,8 @@ export const tierDescription: INodeProperties[] = [
 						body: {
 							name: '={{$parameter["name"]}}',
 							description: '={{$parameter["description"]}}',
+							price_cents: '={{$parameter["priceCents"]}}',
+							currency: '={{$parameter["currency"]}}',
 						},
 					},
 				},
@@ -64,6 +66,8 @@ export const tierDescription: INodeProperties[] = [
 						body: {
 							name: '={{$parameter["name"]}}',
 							description: '={{$parameter["description"]}}',
+							price_cents: '={{$parameter["priceCents"]}}',
+							currency: '={{$parameter["currency"]}}',
 						},
 					},
 				},
@@ -122,5 +126,26 @@ export const tierDescription: INodeProperties[] = [
 			},
 		},
 		default: '',
+	},
+	{
+		displayName: 'Price (Cents)',
+		name: 'priceCents',
+		type: 'number',
+		displayOptions: {
+			show: { resource: ['tier'], operation: ['create', 'update'] },
+		},
+		default: 0,
+		description: 'Price of the tier in cents (e.g. 999 = $9.99)',
+	},
+	{
+		displayName: 'Currency',
+		name: 'currency',
+		type: 'string',
+		displayOptions: {
+			show: { resource: ['tier'], operation: ['create', 'update'] },
+		},
+		default: 'USD',
+		description: 'Currency code for the tier price (e.g. USD, EUR)',
+		placeholder: 'USD',
 	},
 ];
