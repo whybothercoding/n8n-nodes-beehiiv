@@ -48,6 +48,42 @@ export const segmentDescription: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Recalculate',
+				value: 'recalculate',
+				description: 'Trigger recalculation of a segment',
+				action: 'Recalculate a segment',
+				routing: {
+					request: {
+						method: 'POST',
+						url: '=/publications/{{$parameter["publicationId"]}}/segments/{{$parameter["segmentId"]}}/recalculate',
+					},
+				},
+			},
+			{
+				name: 'List Subscribers',
+				value: 'listSubscribers',
+				description: 'List subscriptions in a segment',
+				action: 'List segment subscribers',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/segments/{{$parameter["segmentId"]}}/subscribers',
+					},
+				},
+			},
+			{
+				name: 'List Subscriber IDs',
+				value: 'listSubscriberIds',
+				description: 'List subscription IDs in a segment',
+				action: 'List segment subscriber IDs',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/segments/{{$parameter["segmentId"]}}/expand',
+					},
+				},
+			},
 		],
 		default: 'getAll',
 	},
@@ -72,7 +108,7 @@ export const segmentDescription: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['segment'],
-				operation: ['get', 'delete'],
+				operation: ['get', 'delete', 'recalculate', 'listSubscribers', 'listSubscriberIds'],
 			},
 		},
 		default: '',
