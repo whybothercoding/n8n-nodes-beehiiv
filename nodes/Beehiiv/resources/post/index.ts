@@ -74,6 +74,30 @@ export const postDescription: INodeProperties[] = [
 					},
 				},
 			},
+			{
+				name: 'Get Aggregate Stats',
+				value: 'getAggregateStats',
+				description: 'Get aggregate statistics for posts',
+				action: 'Get post aggregate stats',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/posts/aggregate_stats',
+					},
+				},
+			},
+			{
+				name: 'List Templates',
+				value: 'listTemplates',
+				description: 'Retrieve post templates for a publication',
+				action: 'List post templates',
+				routing: {
+					request: {
+						method: 'GET',
+						url: '=/publications/{{$parameter["publicationId"]}}/post_templates',
+					},
+				},
+			},
 		],
 		default: 'getAll',
 	},
