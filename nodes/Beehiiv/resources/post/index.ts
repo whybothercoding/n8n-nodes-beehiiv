@@ -1,4 +1,11 @@
 import { INodeProperties } from 'n8n-workflow';
+import {
+	beehiivListPagination,
+	mergeAdditionalFields,
+	paginationFields,
+	parseBodyJsonStrings,
+	unwrapDataProperty,
+} from '../../shared/GenericFunctions';
 
 export const postDescription: INodeProperties[] = [
 	{
@@ -18,23 +25,21 @@ export const postDescription: INodeProperties[] = [
 				description: 'Create a new post',
 				action: 'Create a post',
 				routing: {
+					// Beehiiv's create-post body only accepts "title" plus either "body_content"
+					// (raw HTML) or "blocks" (structured content array) — not the subtitle/slug/
+					// audience/scheduling fields this operation used to send.
 					request: {
 						method: 'POST',
 						url: '=/publications/{{$parameter["publicationId"]}}/posts',
 						body: {
 							title: '={{$parameter["title"]}}',
-							subtitle: '={{$parameter["subtitle"]}}',
-							content_html: '={{$parameter["contentHtml"]}}',
-							content_json: '={{$parameter["contentJson"]}}',
-							slug: '={{$parameter["slug"]}}',
-							preview_text: '={{$parameter["previewText"]}}',
-							thumbnail_url: '={{$parameter["thumbnailUrl"]}}',
-							audience: '={{$parameter["audience"]}}',
-							send_to_email: '={{$parameter["sendToEmail"]}}',
-							send_to_web: '={{$parameter["sendToWeb"]}}',
-							draft: '={{$parameter["draft"]}}',
-							schedule_at: '={{$parameter["scheduleAt"]}}',
 						},
+					},
+					send: {
+						preSend: [mergeAdditionalFields('additionalFields'), parseBodyJsonStrings('blocks')],
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -60,6 +65,9 @@ export const postDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/posts/{{$parameter["postId"]}}',
 					},
+					output: {
+						postReceive: [unwrapDataProperty],
+					},
 				},
 			},
 			{
@@ -71,6 +79,9 @@ export const postDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/posts',
+					},
+					operations: {
+						pagination: beehiivListPagination,
 					},
 				},
 			},
@@ -84,6 +95,9 @@ export const postDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/posts/aggregate_stats',
 					},
+					output: {
+						postReceive: [unwrapDataProperty],
+					},
 				},
 			},
 			{
@@ -95,6 +109,9 @@ export const postDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/post_templates',
+					},
+					operations: {
+						pagination: beehiivListPagination,
 					},
 				},
 			},
@@ -142,152 +159,31 @@ export const postDescription: INodeProperties[] = [
 		default: '',
 	},
 	{
-		displayName: 'Subtitle',
-		name: 'subtitle',
-		type: 'string',
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
 		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
+			show: { resource: ['post'], operation: ['create'] },
 		},
-		default: '',
-	},
-	{
-		displayName: 'Content HTML',
-		name: 'contentHtml',
-		type: 'string',
-		typeOptions: {
-			rows: 5,
-		},
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Content JSON',
-		name: 'contentJson',
-		type: 'json',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Slug',
-		name: 'slug',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Preview Text',
-		name: 'previewText',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Thumbnail URL',
-		name: 'thumbnailUrl',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Audience',
-		name: 'audience',
-		type: 'options',
 		options: [
 			{
-				name: 'All',
-				value: 'all',
+				displayName: 'Body Content (HTML)',
+				name: 'body_content',
+				type: 'string',
+				typeOptions: { rows: 5 },
+				default: '',
+				description: 'Raw HTML content for the post. Alternative to Blocks (JSON) below — Beehiiv accepts one or the other.',
 			},
 			{
-				name: 'Premium',
-				value: 'premium',
-			},
-			{
-				name: 'Free',
-				value: 'free',
+				displayName: 'Blocks (JSON)',
+				name: 'blocks',
+				type: 'json',
+				default: '',
+				description: 'Advanced: structured content blocks array, as documented by the Beehiiv API. Alternative to Body Content (HTML).',
 			},
 		],
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: 'all',
 	},
-	{
-		displayName: 'Send to Email',
-		name: 'sendToEmail',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: false,
-	},
-	{
-		displayName: 'Send to Web',
-		name: 'sendToWeb',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: false,
-	},
-	{
-		displayName: 'Draft',
-		name: 'draft',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: false,
-	},
-	{
-		displayName: 'Schedule At',
-		name: 'scheduleAt',
-		type: 'dateTime',
-		displayOptions: {
-			show: {
-				resource: ['post'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
+	...paginationFields('post', ['getAll', 'listTemplates']),
 ];

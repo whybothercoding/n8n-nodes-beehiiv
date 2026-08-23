@@ -1,4 +1,5 @@
 import { INodeProperties } from 'n8n-workflow';
+import { beehiivListPagination, paginationFields, unwrapDataProperty } from '../../shared/GenericFunctions';
 
 export const automationDescription: INodeProperties[] = [
 	{
@@ -22,6 +23,9 @@ export const automationDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}',
 					},
+					output: {
+						postReceive: [unwrapDataProperty],
+					},
 				},
 			},
 			{
@@ -33,6 +37,9 @@ export const automationDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/automations',
+					},
+					operations: {
+						pagination: beehiivListPagination,
 					},
 				},
 			},
@@ -46,6 +53,9 @@ export const automationDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}/journeys',
 					},
+					operations: {
+						pagination: beehiivListPagination,
+					},
 				},
 			},
 			{
@@ -57,6 +67,9 @@ export const automationDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/automations/{{$parameter["automationId"]}}/journeys/{{$parameter["journeyId"]}}',
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -72,6 +85,9 @@ export const automationDescription: INodeProperties[] = [
 						body: {
 							subscription_id: '={{$parameter["subscriptionId"]}}',
 						},
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -127,4 +143,5 @@ export const automationDescription: INodeProperties[] = [
 		default: '',
 		description: 'The ID of the subscription to add to this automation',
 	},
+	...paginationFields('automation', ['getAll', 'listJourneys']),
 ];

@@ -1,2 +1,10 @@
 dist
 node_modules
+*.tar.gz
+.DS_Store
+coverage
+beehiiv-mcp-server
+
+# internal planning notes — not meant for the public repo
+docs/
+CLAUDE.md

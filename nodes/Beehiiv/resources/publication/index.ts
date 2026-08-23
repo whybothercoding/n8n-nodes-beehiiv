@@ -1,4 +1,5 @@
 import { INodeProperties } from 'n8n-workflow';
+import { beehiivListPagination, paginationFields, unwrapDataProperty } from '../../shared/GenericFunctions';
 
 export const publicationDescription: INodeProperties[] = [
 	{
@@ -22,6 +23,9 @@ export const publicationDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/publications',
 					},
+					operations: {
+						pagination: beehiivListPagination,
+					},
 				},
 			},
 			{
@@ -33,6 +37,9 @@ export const publicationDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}',
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -53,4 +60,5 @@ export const publicationDescription: INodeProperties[] = [
 		default: '',
 		description: 'The ID of the publication',
 	},
+	...paginationFields('publication', ['getAll']),
 ];

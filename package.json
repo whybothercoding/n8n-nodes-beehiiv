@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"description": "n8n node for Beehiiv API",
 	"license": "MIT",
-	"homepage": "",
+	"homepage": "https://github.com/whybothercoding/n8n-nodes-beehiiv",
 	"keywords": [
 		"n8n-community-node-package"
 	],
@@ -13,7 +13,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/theoslasha/n8n-nodes-beehiiv.git"
+		"url": "https://github.com/whybothercoding/n8n-nodes-beehiiv.git"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -21,6 +21,7 @@
 		"dev": "n8n-node dev",
 		"lint": "n8n-node lint",
 		"lint:fix": "n8n-node lint --fix",
+		"test": "jest",
 		"release": "n8n-node release",
 		"prepublishOnly": "n8n-node prerelease"
 	},
@@ -39,9 +40,13 @@
 	},
 	"devDependencies": {
 		"@n8n/node-cli": "*",
+		"@release-it/conventional-changelog": "^12.0.0",
+		"@types/jest": "^30.0.0",
 		"eslint": "9.32.0",
+		"jest": "^30.4.2",
 		"prettier": "3.6.2",
 		"release-it": "^19.0.4",
+		"ts-jest": "^29.4.12",
 		"typescript": "5.9.2"
 	},
 	"peerDependencies": {

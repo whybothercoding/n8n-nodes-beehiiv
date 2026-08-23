@@ -1,4 +1,5 @@
 import { INodeProperties } from 'n8n-workflow';
+import { beehiivListPagination, paginationFields, unwrapDataProperty } from '../../shared/GenericFunctions';
 
 export const customFieldDescription: INodeProperties[] = [
 	{
@@ -22,9 +23,12 @@ export const customFieldDescription: INodeProperties[] = [
 						method: 'POST',
 						url: '=/publications/{{$parameter["publicationId"]}}/custom_fields',
 						body: {
-							name: '={{$parameter["name"]}}',
-							type: '={{$parameter["type"]}}',
+							display: '={{$parameter["display"]}}',
+							kind: '={{$parameter["kind"]}}',
 						},
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -50,6 +54,9 @@ export const customFieldDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/custom_fields/{{$parameter["customFieldId"]}}',
 					},
+					output: {
+						postReceive: [unwrapDataProperty],
+					},
 				},
 			},
 			{
@@ -62,6 +69,9 @@ export const customFieldDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/custom_fields',
 					},
+					operations: {
+						pagination: beehiivListPagination,
+					},
 				},
 			},
 			{
@@ -70,12 +80,16 @@ export const customFieldDescription: INodeProperties[] = [
 				description: 'Update a custom field',
 				action: 'Update a custom field',
 				routing: {
+					// Beehiiv's update-custom-field endpoint is PUT, not PATCH, and only accepts "display".
 					request: {
-						method: 'PATCH',
+						method: 'PUT',
 						url: '=/publications/{{$parameter["publicationId"]}}/custom_fields/{{$parameter["customFieldId"]}}',
 						body: {
-							name: '={{$parameter["name"]}}',
+							display: '={{$parameter["display"]}}',
 						},
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -110,40 +124,46 @@ export const customFieldDescription: INodeProperties[] = [
 		description: 'The ID of the custom field',
 	},
 	{
-		displayName: 'Name',
-		name: 'name',
+		displayName: 'Display Name',
+		name: 'display',
 		type: 'string',
 		required: true,
 		displayOptions: {
 			show: {
 				resource: ['customField'],
-				operation: ['create', 'update'],
+				operation: ['create'],
 			},
 		},
 		default: '',
+		description: 'The label shown for this custom field',
 	},
 	{
-		displayName: 'Type',
-		name: 'type',
+		displayName: 'Display Name',
+		name: 'display',
+		type: 'string',
+		displayOptions: {
+			show: {
+				resource: ['customField'],
+				operation: ['update'],
+			},
+		},
+		default: '',
+		description: 'The new label to show for this custom field',
+	},
+	{
+		displayName: 'Kind',
+		name: 'kind',
 		type: 'options',
 		options: [
-			{
-				name: 'String',
-				value: 'string',
-			},
-			{
-				name: 'Number',
-				value: 'number',
-			},
-			{
-				name: 'Date',
-				value: 'date',
-			},
-			{
-				name: 'Boolean',
-				value: 'boolean',
-			},
+			{ name: 'String', value: 'string' },
+			{ name: 'Integer', value: 'integer' },
+			{ name: 'Double', value: 'double' },
+			{ name: 'Boolean', value: 'boolean' },
+			{ name: 'Date', value: 'date' },
+			{ name: 'Datetime', value: 'datetime' },
+			{ name: 'List', value: 'list' },
 		],
+		required: true,
 		displayOptions: {
 			show: {
 				resource: ['customField'],
@@ -151,5 +171,7 @@ export const customFieldDescription: INodeProperties[] = [
 			},
 		},
 		default: 'string',
+		description: 'The type of value stored in this custom field',
 	},
+	...paginationFields('customField', ['getAll']),
 ];

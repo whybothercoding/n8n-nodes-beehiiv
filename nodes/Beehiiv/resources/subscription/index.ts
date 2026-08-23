@@ -1,4 +1,34 @@
 import { INodeProperties } from 'n8n-workflow';
+import {
+	beehiivListPagination,
+	mergeAdditionalFields,
+	paginationFields,
+	parseJsonBodyField,
+	splitCommaList,
+	unwrapDataProperty,
+} from '../../shared/GenericFunctions';
+
+const customFieldsField: INodeProperties = {
+	displayName: 'Custom Fields',
+	name: 'customFields',
+	type: 'fixedCollection',
+	typeOptions: { multipleValues: true },
+	displayOptions: {
+		show: { resource: ['subscription'], operation: ['update', 'updateByEmail', 'create'] },
+	},
+	default: {},
+	options: [
+		{
+			name: 'fields',
+			displayName: 'Field',
+			values: [
+				{ displayName: 'Name', name: 'name', type: 'string', default: '', description: 'Custom field name' },
+				{ displayName: 'Value', name: 'value', type: 'string', default: '', description: 'Custom field value' },
+			],
+		},
+	],
+	description: 'Custom fields to set on the subscription. The fields must already exist for the publication.',
+};
 
 export const subscriptionDescription: INodeProperties[] = [
 	{
@@ -23,16 +53,14 @@ export const subscriptionDescription: INodeProperties[] = [
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions',
 						body: {
 							email: '={{$parameter["email"]}}',
-							reactivate_existing: '={{$parameter["reactivateExisting"]}}',
-							send_welcome_email: '={{$parameter["sendWelcomeEmail"]}}',
-							utm_source: '={{$parameter["utmSource"]}}',
-							utm_medium: '={{$parameter["utmMedium"]}}',
-							utm_campaign: '={{$parameter["utmCampaign"]}}',
-							referring_site: '={{$parameter["referringSite"]}}',
-							referral_code: '={{$parameter["referralCode"]}}',
 							custom_fields: '={{$parameter["customFields"]["fields"]}}',
-							tags: '={{$parameter["tags"]}}',
 						},
+					},
+					send: {
+						preSend: [mergeAdditionalFields('additionalFields')],
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -58,6 +86,9 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}',
 					},
+					output: {
+						postReceive: [unwrapDataProperty],
+					},
 				},
 			},
 			{
@@ -69,6 +100,9 @@ export const subscriptionDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["email"])}}',
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -82,6 +116,9 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions',
 					},
+					operations: {
+						pagination: beehiivListPagination,
+					},
 				},
 			},
 			{
@@ -94,11 +131,14 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'PUT',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}',
 						body: {
-							email: '={{$parameter["updateEmail"]}}',
-							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
-							unsubscribe: '={{$parameter["unsubscribe"]}}',
 							custom_fields: '={{$parameter["customFields"]["fields"]}}',
 						},
+					},
+					send: {
+						preSend: [mergeAdditionalFields('updateFields')],
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -112,26 +152,33 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'PUT',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["emailToUpdate"])}}',
 						body: {
-							email: '={{$parameter["updateEmail"]}}',
-							stripe_customer_id: '={{$parameter["stripeCustomerId"]}}',
-							unsubscribe: '={{$parameter["unsubscribe"]}}',
 							custom_fields: '={{$parameter["customFields"]["fields"]}}',
 						},
+					},
+					send: {
+						preSend: [mergeAdditionalFields('updateFields')],
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
 			{
 				name: 'Add Tag',
 				value: 'addTag',
-				description: 'Add a tag to a subscription',
+				description: 'Add tags to a subscription',
 				action: 'Add a tag to a subscription',
 				routing: {
+					// Beehiiv's tag endpoint takes a "tags" array, not a single "tag" string.
 					request: {
 						method: 'POST',
 						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/{{$parameter["subscriptionId"]}}/tags',
-						body: {
-							tag: '={{$parameter["tag"]}}',
-						},
+					},
+					send: {
+						preSend: [splitCommaList('tags')],
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -141,12 +188,13 @@ export const subscriptionDescription: INodeProperties[] = [
 				description: 'Create multiple subscriptions in bulk',
 				action: 'Bulk create subscriptions',
 				routing: {
+					// The bulk endpoint lives at /bulk_subscriptions, not /subscriptions/bulk.
 					request: {
 						method: 'POST',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk',
-						body: {
-							subscriptions: '={{$parameter["subscriptions"]}}',
-						},
+						url: '=/publications/{{$parameter["publicationId"]}}/bulk_subscriptions',
+					},
+					send: {
+						preSend: [parseJsonBodyField('subscriptions')],
 					},
 				},
 			},
@@ -156,28 +204,15 @@ export const subscriptionDescription: INodeProperties[] = [
 				description: 'Update multiple subscriptions in bulk',
 				action: 'Bulk update subscriptions',
 				routing: {
+					// The bulk update endpoint lives at /subscriptions/bulk_actions, not /subscriptions/bulk.
+					// Setting "unsubscribe" or "tier" per item (see the Subscriptions (JSON) field) covers
+					// what a separate "bulk update status" endpoint would have done.
 					request: {
 						method: 'PUT',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk',
-						body: {
-							subscriptions: '={{$parameter["bulkUpdateItems"]}}',
-						},
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk_actions',
 					},
-				},
-			},
-			{
-				name: 'Bulk Update Status',
-				value: 'bulkUpdateStatus',
-				description: 'Update the status of multiple subscriptions',
-				action: 'Bulk update subscription status',
-				routing: {
-					request: {
-						method: 'PUT',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/bulk/status',
-						body: {
-							subscription_ids: '={{$parameter["subscriptionIds"]}}',
-							status: '={{$parameter["bulkStatus"]}}',
-						},
+					send: {
+						preSend: [parseJsonBodyField('bulkUpdateItems', 'subscriptions')],
 					},
 				},
 			},
@@ -191,6 +226,9 @@ export const subscriptionDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/bulk_subscription_updates',
 					},
+					operations: {
+						pagination: beehiivListPagination,
+					},
 				},
 			},
 			{
@@ -202,6 +240,9 @@ export const subscriptionDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/bulk_subscription_updates/{{$parameter["bulkUpdateId"]}}',
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
@@ -251,156 +292,97 @@ export const subscriptionDescription: INodeProperties[] = [
 		description: 'The email address of the subscriber',
 	},
 	{
-		displayName: 'Unsubscribe',
-		name: 'unsubscribe',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['update', 'updateByEmail'],
-			},
-		},
-		default: false,
-		description: 'Whether to unsubscribe the user',
-	},
-	{
-		displayName: 'Reactivate Existing',
-		name: 'reactivateExisting',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: false,
-		description: 'Whether to reactivate an existing subscription',
-	},
-	{
-		displayName: 'Send Welcome Email',
-		name: 'sendWelcomeEmail',
-		type: 'boolean',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: false,
-		description: 'Whether to send a welcome email',
-	},
-	{
-		displayName: 'UTM Source',
-		name: 'utmSource',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'UTM Medium',
-		name: 'utmMedium',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'UTM Campaign',
-		name: 'utmCampaign',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Referring Site',
-		name: 'referringSite',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Referral Code',
-		name: 'referralCode',
-		type: 'string',
-		displayOptions: {
-			show: {
-				resource: ['subscription'],
-				operation: ['create'],
-			},
-		},
-		default: '',
-	},
-	{
-		displayName: 'Update Email',
-		name: 'updateEmail',
-		type: 'string',
-		placeholder: 'name@email.com',
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update', 'updateByEmail'] },
-		},
-		default: '',
-		description: 'New email address for the subscriber',
-	},
-	{
-		displayName: 'Stripe Customer ID',
-		name: 'stripeCustomerId',
-		type: 'string',
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update', 'updateByEmail'] },
-		},
-		default: '',
-		description: 'Stripe customer ID to associate with this subscription',
-	},
-	{
-		displayName: 'Custom Fields',
-		name: 'customFields',
-		type: 'fixedCollection',
-		typeOptions: { multipleValues: true },
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['update', 'updateByEmail', 'create'] },
-		},
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
 		default: {},
-		options: [
-			{
-				name: 'fields',
-				displayName: 'Field',
-				values: [
-					{ displayName: 'Name', name: 'name', type: 'string', default: '', description: 'Custom field name' },
-					{ displayName: 'Value', name: 'value', type: 'string', default: '', description: 'Custom field value' },
-				],
-			},
-		],
-		description: 'Custom fields to set on the subscription',
-	},
-	{
-		displayName: 'Tags',
-		name: 'tags',
-		type: 'json',
 		displayOptions: {
 			show: { resource: ['subscription'], operation: ['create'] },
 		},
-		default: '[]',
-		description: 'Array of tags to apply. Example: ["newsletter","vip"]',
+		options: [
+			{
+				displayName: 'Reactivate Existing',
+				name: 'reactivate_existing',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to reactivate an existing subscription',
+			},
+			{
+				displayName: 'Send Welcome Email',
+				name: 'send_welcome_email',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to send a welcome email',
+			},
+			{ displayName: 'UTM Source', name: 'utm_source', type: 'string', default: '' },
+			{ displayName: 'UTM Medium', name: 'utm_medium', type: 'string', default: '' },
+			{ displayName: 'UTM Campaign', name: 'utm_campaign', type: 'string', default: '' },
+			{ displayName: 'Referring Site', name: 'referring_site', type: 'string', default: '' },
+			{ displayName: 'Referral Code', name: 'referral_code', type: 'string', default: '' },
+			{
+				displayName: 'Double Opt Override',
+				name: 'double_opt_override',
+				type: 'options',
+				options: [
+					{ name: 'Not Set', value: 'not_set' },
+					{ name: 'On', value: 'on' },
+					{ name: 'Off', value: 'off' },
+				],
+				default: 'not_set',
+			},
+			{
+				displayName: 'Stripe Customer ID',
+				name: 'stripe_customer_id',
+				type: 'string',
+				default: '',
+			},
+		],
 	},
+	{
+		displayName: 'Update Fields',
+		name: 'updateFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: { resource: ['subscription'], operation: ['update', 'updateByEmail'] },
+		},
+		options: [
+			{
+				displayName: 'Email',
+				name: 'email',
+				type: 'string',
+				placeholder: 'name@email.com',
+				default: '',
+				description: 'New email address for the subscriber',
+			},
+			{
+				displayName: 'Stripe Customer ID',
+				name: 'stripe_customer_id',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Unsubscribe',
+				name: 'unsubscribe',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to unsubscribe the user',
+			},
+			{
+				displayName: 'Tier',
+				name: 'tier',
+				type: 'options',
+				options: [
+					{ name: 'Free', value: 'free' },
+					{ name: 'Premium', value: 'premium' },
+				],
+				default: 'free',
+			},
+		],
+	},
+	customFieldsField,
 	{
 		displayName: 'Email to Update',
 		name: 'emailToUpdate',
@@ -414,15 +396,16 @@ export const subscriptionDescription: INodeProperties[] = [
 		description: 'The email address of the subscriber to update',
 	},
 	{
-		displayName: 'Tag',
-		name: 'tag',
+		displayName: 'Tags',
+		name: 'tags',
 		type: 'string',
 		required: true,
 		displayOptions: {
 			show: { resource: ['subscription'], operation: ['addTag'] },
 		},
 		default: '',
-		description: 'The tag to add to the subscription',
+		description: 'Comma-separated list of tags to add to the subscription',
+		placeholder: 'newsletter,vip',
 	},
 	{
 		displayName: 'Subscriptions (JSON)',
@@ -444,33 +427,7 @@ export const subscriptionDescription: INodeProperties[] = [
 			show: { resource: ['subscription'], operation: ['bulkUpdate'] },
 		},
 		default: '[]',
-		description: 'Array of subscription update objects. Each must have a "subscription_id". Example: [{"subscription_id":"sub_123","email":"new@example.com"}]',
-	},
-	{
-		displayName: 'Subscription IDs',
-		name: 'subscriptionIds',
-		type: 'json',
-		required: true,
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['bulkUpdateStatus'] },
-		},
-		default: '[]',
-		description: 'Array of subscription IDs to update. Example: ["sub_abc123","sub_def456"]',
-	},
-	{
-		displayName: 'Status',
-		name: 'bulkStatus',
-		type: 'options',
-		options: [
-			{ name: 'Active', value: 'active' },
-			{ name: 'Inactive', value: 'inactive' },
-		],
-		required: true,
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['bulkUpdateStatus'] },
-		},
-		default: 'active',
-		description: 'The status to set for the selected subscriptions',
+		description: 'Array of subscription update objects. Each must have a "subscription_id" and optional fields: email, stripe_customer_id, unsubscribe, tier, custom_fields. Example: [{"subscription_id":"sub_123","unsubscribe":true}]',
 	},
 	{
 		displayName: 'Bulk Update ID',
@@ -483,4 +440,5 @@ export const subscriptionDescription: INodeProperties[] = [
 		default: '',
 		description: 'The ID of the bulk subscription update record',
 	},
+	...paginationFields('subscription', ['getAll', 'listBulkUpdates']),
 ];

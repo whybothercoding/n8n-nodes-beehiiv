@@ -1,4 +1,5 @@
 import { INodeProperties } from 'n8n-workflow';
+import { unwrapDataProperty } from '../../shared/GenericFunctions';
 
 export const referralProgramDescription: INodeProperties[] = [
 	{
@@ -21,6 +22,9 @@ export const referralProgramDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '=/publications/{{$parameter["publicationId"]}}/referral_program',
+					},
+					output: {
+						postReceive: [unwrapDataProperty],
 					},
 				},
 			},
