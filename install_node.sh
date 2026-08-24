@@ -20,9 +20,24 @@ rm -rf "$INSTALL_DIR"
 echo "Creating installation directory: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 echo "Extracting archive: $TARBALL"
-tar -xzvf "$TARBALL" -C "$INSTALL_DIR"
+# npm pack tarballs nest everything under a top-level "package/" directory -
+# strip it so package.json lands directly at $INSTALL_DIR (where n8n's
+# custom-node loader expects to find it), not one level too deep.
+tar -xzvf "$TARBALL" -C "$INSTALL_DIR" --strip-components=1
 echo "Changing to directory: $INSTALL_DIR"
 cd "$INSTALL_DIR"
-echo "Installing production dependencies..."
-npm install --production
+if command -v npm >/dev/null 2>&1; then
+	echo "Installing production dependencies..."
+	npm install --production
+else
+	echo "npm not found on this host - skipping (only needed if package.json declares runtime dependencies; n8n-workflow is a peer dep n8n provides itself)."
+fi
+echo "Fixing ownership/permissions for the n8n container user..."
+# The chown above ran before extraction, so it never touched these new files.
+# chown-by-name also can't be trusted to match the container's runtime user
+# (n8n typically runs as a non-root "node" uid inside Docker while this script
+# runs as the host SSH user) - chmod to world-readable guarantees the files
+# are readable regardless of any host/container uid mismatch.
+chown -R "$N8N_USER:$N8N_USER" "$INSTALL_DIR" 2>/dev/null || true
+chmod -R a+rX "$INSTALL_DIR"
 echo "Installation complete."
