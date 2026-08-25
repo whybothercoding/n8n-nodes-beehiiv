@@ -1,28 +1,43 @@
 #!/bin/bash
-# Installs this node into a self-hosted n8n instance's custom nodes directory
-# from a pre-built tarball (e.g. `npm pack`, renamed to n8n-nodes-beehiiv.tar.gz).
+# Installs this node into a self-hosted n8n instance from a pre-built tarball
+# (e.g. `npm pack`, renamed to n8n-nodes-beehiiv.tar.gz).
+#
+# IMPORTANT: this installs into ~/.n8n/nodes/node_modules/, NOT ~/.n8n/custom/.
+# Those are two different, non-interchangeable loaders in n8n's own source
+# (n8n-core's nodes-loader): anything placed directly under ~/.n8n/custom/ is
+# picked up by CustomDirectoryLoader, which ignores package.json entirely and
+# registers every node under a flat "CUSTOM.<node-name>" type (e.g.
+# "CUSTOM.beehiiv"), NOT "n8n-nodes-beehiiv.beehiiv" - so it silently fails to
+# match any workflow referencing the real community-node type name. The
+# community_packages module instead scans ~/.n8n/nodes/node_modules/n8n-nodes-*
+# via PackageDirectoryLoader, which DOES read package.json's "n8n" field and
+# preserves the package's own name as the type prefix - confirmed live
+# 2026-08-25 by reading n8n 2.35.7's actual loader source on the target VPS,
+# and by finding other working community nodes already installed there this
+# exact way.
 #
 # Usage:   ./install_node.sh [path-to-tarball]
-# Override the target user/directory with N8N_USER / N8N_CUSTOM_DIR env vars,
-# e.g.: N8N_USER=n8n N8N_CUSTOM_DIR=/home/n8n/.n8n/custom ./install_node.sh
+# Override the target user/directory with N8N_USER / N8N_NODES_DIR env vars,
+# e.g.: N8N_USER=n8n N8N_NODES_DIR=/home/n8n/.n8n/nodes ./install_node.sh
 set -e
 
 N8N_USER="${N8N_USER:-$(whoami)}"
-N8N_CUSTOM_DIR="${N8N_CUSTOM_DIR:-$HOME/.n8n/custom}"
-INSTALL_DIR="$N8N_CUSTOM_DIR/n8n-nodes-beehiiv"
+N8N_NODES_DIR="${N8N_NODES_DIR:-$HOME/.n8n/nodes}"
+NODE_MODULES_DIR="$N8N_NODES_DIR/node_modules"
+INSTALL_DIR="$NODE_MODULES_DIR/n8n-nodes-beehiiv"
 TARBALL="${1:-/tmp/n8n-nodes-beehiiv.tar.gz}"
 
-echo "Creating directory: $N8N_CUSTOM_DIR"
-mkdir -p "$N8N_CUSTOM_DIR"
-chown -R "$N8N_USER:$N8N_USER" "$N8N_CUSTOM_DIR"
+echo "Creating directory: $NODE_MODULES_DIR"
+mkdir -p "$NODE_MODULES_DIR"
+chown -R "$N8N_USER:$N8N_USER" "$NODE_MODULES_DIR" 2>/dev/null || true
 echo "Removing old version if it exists..."
 rm -rf "$INSTALL_DIR"
 echo "Creating installation directory: $INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 echo "Extracting archive: $TARBALL"
 # npm pack tarballs nest everything under a top-level "package/" directory -
-# strip it so package.json lands directly at $INSTALL_DIR (where n8n's
-# custom-node loader expects to find it), not one level too deep.
+# strip it so package.json lands directly at $INSTALL_DIR (where
+# PackageDirectoryLoader expects to find it), not one level too deep.
 tar -xzvf "$TARBALL" -C "$INSTALL_DIR" --strip-components=1
 echo "Changing to directory: $INSTALL_DIR"
 cd "$INSTALL_DIR"

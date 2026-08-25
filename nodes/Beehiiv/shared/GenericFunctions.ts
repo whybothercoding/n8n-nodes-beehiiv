@@ -78,6 +78,17 @@ export function paginationFields(resource: string, operations: string[]): INodeP
 			displayOptions: {
 				show: { resource: [resource], operation: operations },
 			},
+			routing: {
+				// Without this, the routing engine never invokes operations.pagination
+				// (beehiivListPagination) at all - it just does a single plain request and
+				// returns Beehiiv's raw {data, page, limit, total_results, total_pages} envelope
+				// as one item, regardless of Return All / Limit. See n8n-core's routing-node.js:
+				// custom pagination only runs when requestData.paginate is true, which is only
+				// ever set from a node property's own routing.send.paginate.
+				send: {
+					paginate: true,
+				},
+			},
 		},
 		{
 			displayName: 'Limit',
