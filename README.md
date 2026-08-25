@@ -20,7 +20,7 @@ This is an n8n community node. It lets you use [Beehiiv](https://www.beehiiv.com
 
 ## Installation
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
+Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation. The npm package name is `@whybothercoding/n8n-nodes-beehiiv` (scoped — the unscoped `n8n-nodes-beehiiv` belongs to an unrelated package).
 
 ## Operations
 

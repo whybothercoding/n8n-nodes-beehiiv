@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-beehiiv",
+	"name": "@whybothercoding/n8n-nodes-beehiiv",
 	"version": "0.1.0",
 	"description": "n8n node for Beehiiv API",
 	"license": "MIT",
@@ -14,6 +14,9 @@
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/whybothercoding/n8n-nodes-beehiiv.git"
+	},
+	"publishConfig": {
+		"access": "public"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -39,7 +42,7 @@
 		]
 	},
 	"devDependencies": {
-		"@n8n/node-cli": "*",
+		"@n8n/node-cli": "^0.45.4",
 		"@release-it/conventional-changelog": "^12.0.0",
 		"@types/jest": "^30.0.0",
 		"eslint": "9.32.0",
