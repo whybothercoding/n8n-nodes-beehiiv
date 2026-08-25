@@ -13,7 +13,10 @@ export class Beehiiv implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'Beehiiv',
 		name: 'beehiiv',
-		icon: 'file:../../icons/beehiiv.svg',
+		icon: {
+			light: 'file:../../icons/beehiiv.light.svg',
+			dark: 'file:../../icons/beehiiv.dark.svg',
+		},
 		group: ['input'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',

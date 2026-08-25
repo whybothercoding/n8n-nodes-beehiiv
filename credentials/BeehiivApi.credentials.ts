@@ -10,7 +10,10 @@ export class BeehiivApi implements ICredentialType {
 	name = 'beehiivApi';
 	displayName = 'Beehiiv API';
 	documentationUrl = 'https://developers.beehiiv.com/api-reference';
-	icon: Icon = 'file:../icons/beehiiv.svg';
+	icon: Icon = {
+		light: 'file:../icons/beehiiv.light.svg',
+		dark: 'file:../icons/beehiiv.dark.svg',
+	};
 
 	properties: INodeProperties[] = [
 		{
