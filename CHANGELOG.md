@@ -4,6 +4,14 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+## [0.1.1]
+
+Republished via the new GitHub Actions CI pipeline with npm provenance — no functional changes to the node itself. Also: `peerDependencies.n8n-workflow` now correctly pinned to `"*"` per n8n's current lint requirements, and `.github/workflows/publish.yml` replaced with a directly-scripted publish (lint/typecheck/build/test/publish as explicit steps) instead of routing through `n8n-node release`, which needs an interactive terminal and isn't safe to run unattended.
+
+## [0.1.0]
+
+First published release, on `@indiegoweb/n8n-nodes-beehiiv`.
+
 ### Fixed
 
 Verified every operation against the real Beehiiv API v2 reference docs and corrected the ones that didn't match:
@@ -26,7 +34,3 @@ Verified every operation against the real Beehiiv API v2 reference docs and corr
 ### Removed
 
 - Stray build artifact (`n8n-nodes-beehiiv.tar.gz`) and a broken absolute-path symlink (`beehiiv-mcp-server`) that were committed to the repo.
-
-## [0.1.0]
-
-Initial implementation, built out resource-by-resource: Publication, Subscription, Post, Custom Field, Segment, Automation, Tier, Referral Program, and Webhook, each with CRUD/list operations against the Beehiiv API v2.
