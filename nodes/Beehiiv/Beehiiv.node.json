@@ -1,5 +1,5 @@
 {
-	"node": "@whybothercoding/n8n-nodes-beehiiv.beehiiv",
+	"node": "@indiegoweb/n8n-nodes-beehiiv.beehiiv",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Marketing & Content"],

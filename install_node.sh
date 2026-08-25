@@ -7,11 +7,11 @@
 # (n8n-core's nodes-loader): anything placed directly under ~/.n8n/custom/ is
 # picked up by CustomDirectoryLoader, which ignores package.json entirely and
 # registers every node under a flat "CUSTOM.<node-name>" type (e.g.
-# "CUSTOM.beehiiv"), NOT "@whybothercoding/n8n-nodes-beehiiv.beehiiv" - so it
+# "CUSTOM.beehiiv"), NOT "@indiegoweb/n8n-nodes-beehiiv.beehiiv" - so it
 # silently fails to match any workflow referencing the real community-node
 # type name.
 #
-# The package is now scoped (@whybothercoding/n8n-nodes-beehiiv), because the
+# The package is now scoped (@indiegoweb/n8n-nodes-beehiiv), because the
 # unscoped name n8n-nodes-beehiiv is already taken on the npm registry by an
 # unrelated package - confirmed 2026-08-25 via `npm view n8n-nodes-beehiiv`.
 # n8n's CommunityPackagesService (packages/cli/src/modules/community-packages/
@@ -19,7 +19,7 @@
 # scoped names (`parseNpmPackageName` splits the `@scope/` prefix before
 # checking for the `n8n-nodes-` prefix), and installs to
 # `<downloadDir>/node_modules/<packageName>` using the full scoped name as the
-# path - so on disk this becomes .../node_modules/@whybothercoding/n8n-nodes-beehiiv/,
+# path - so on disk this becomes .../node_modules/@indiegoweb/n8n-nodes-beehiiv/,
 # same nesting npm itself uses. n8n's own source (read 2026-08-25, current
 # master) still carries an open `// TODO: make sure that this works for scoped
 # packages as well` right in that install path, but real-world confirmation
@@ -54,7 +54,7 @@ set -e
 N8N_USER="${N8N_USER:-$(whoami)}"
 N8N_NODES_DIR="${N8N_NODES_DIR:-$HOME/.n8n/nodes}"
 NODE_MODULES_DIR="$N8N_NODES_DIR/node_modules"
-INSTALL_DIR="$NODE_MODULES_DIR/@whybothercoding/n8n-nodes-beehiiv"
+INSTALL_DIR="$NODE_MODULES_DIR/@indiegoweb/n8n-nodes-beehiiv"
 TARBALL="${1:-/tmp/n8n-nodes-beehiiv.tar.gz}"
 
 echo "Creating directory: $NODE_MODULES_DIR"
