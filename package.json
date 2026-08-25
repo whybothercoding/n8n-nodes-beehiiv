@@ -1,6 +1,6 @@
 {
 	"name": "@indiegoweb/n8n-nodes-beehiiv",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "n8n node for Beehiiv API",
 	"license": "MIT",
 	"homepage": "https://github.com/whybothercoding/n8n-nodes-beehiiv",
@@ -9,7 +9,7 @@
 	],
 	"author": {
 		"name": "Theo Slasha",
-		"email": "theo@slasha.com"
+		"email": "contact@indiegoweb.com"
 	},
 	"repository": {
 		"type": "git",

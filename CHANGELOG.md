@@ -4,6 +4,10 @@ All notable changes to this project are documented here. Format loosely follows 
 
 ## [Unreleased]
 
+## [0.1.2]
+
+Fixed `author.email` in package.json — was `theo@slasha.com` (stale), now the correct `contact@indiegoweb.com`. No functional changes to the node.
+
 ## [0.1.1]
 
 Republished via the new GitHub Actions CI pipeline with npm provenance — no functional changes to the node itself. Also: `peerDependencies.n8n-workflow` now correctly pinned to `"*"` per n8n's current lint requirements, and `.github/workflows/publish.yml` replaced with a directly-scripted publish (lint/typecheck/build/test/publish as explicit steps) instead of routing through `n8n-node release`, which needs an interactive terminal and isn't safe to run unattended.
