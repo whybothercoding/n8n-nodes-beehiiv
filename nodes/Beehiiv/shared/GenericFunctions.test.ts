@@ -1,3 +1,10 @@
+import type {
+	DeclarativeRestApiSettings,
+	IDataObject,
+	IExecutePaginationFunctions,
+	IExecuteSingleFunctions,
+	IHttpRequestOptions,
+} from 'n8n-workflow';
 import {
 	beehiivListPagination,
 	mapTierPrices,
@@ -9,93 +16,104 @@ import {
 
 type ParamMap = Record<string, unknown>;
 
-function fakeExecuteSingleContext(params: ParamMap) {
+function fakeExecuteSingleContext(params: ParamMap): IExecuteSingleFunctions {
 	return {
 		getNodeParameter: (name: string, fallback?: unknown) =>
 			name in params ? params[name] : fallback,
-	};
+	} as unknown as IExecuteSingleFunctions;
+}
+
+function fakeRequestOptions(body: IDataObject): IHttpRequestOptions {
+	return { body } as unknown as IHttpRequestOptions;
 }
 
 function fakePaginationContext(params: ParamMap, pages: unknown[]) {
 	let call = 0;
-	return {
+	const calls: unknown[][] = [];
+	const httpRequestMock = jest.fn((...args: unknown[]) => {
+		calls.push(args);
+		return Promise.resolve(pages[call++]);
+	});
+	const ctx = {
 		getNodeParameter: (name: string, fallback?: unknown) =>
 			name in params ? params[name] : fallback,
 		helpers: {
 			httpRequestWithAuthentication: {
-				call: jest.fn(async () => pages[call++]),
+				call: httpRequestMock,
 			},
 		},
-	};
+	} as unknown as IExecutePaginationFunctions;
+	return { ctx, httpRequestMock, calls };
 }
 
 describe('beehiivListPagination', () => {
-	const baseRequestOptions = () => ({
-		options: { url: 'https://api.beehiiv.com/v2/publications/pub_1/subscriptions', qs: {} },
-	});
+	const baseRequestOptions = () =>
+		({
+			options: { url: 'https://api.beehiiv.com/v2/publications/pub_1/subscriptions', qs: {} },
+		}) as unknown as DeclarativeRestApiSettings.ResultOptions;
 
 	it('walks every page and flattens each record into its own item', async () => {
-		const ctx = fakePaginationContext({ returnAll: true }, [
+		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: true }, [
 			{ data: [{ id: '1' }, { id: '2' }], pagination: { has_more: true, next_cursor: 'c1' } },
 			{ data: [{ id: '3' }], pagination: { has_more: false } },
 		]);
 
-		const result = await beehiivListPagination.call(ctx as any, baseRequestOptions() as any);
+		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
 
 		expect(result).toEqual([{ json: { id: '1' } }, { json: { id: '2' } }, { json: { id: '3' } }]);
-		expect(ctx.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledTimes(2);
+		expect(httpRequestMock).toHaveBeenCalledTimes(2);
 	});
 
 	it('stops as soon as the requested limit is reached, even mid-page', async () => {
-		const ctx = fakePaginationContext({ returnAll: false, limit: 2 }, [
+		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: false, limit: 2 }, [
 			{ data: [{ id: '1' }, { id: '2' }, { id: '3' }], pagination: { has_more: true, next_cursor: 'c1' } },
 		]);
 
-		const result = await beehiivListPagination.call(ctx as any, baseRequestOptions() as any);
+		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
 
 		expect(result).toHaveLength(2);
-		expect(ctx.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledTimes(1);
+		expect(httpRequestMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('stops when the API reports no further pages', async () => {
-		const ctx = fakePaginationContext({ returnAll: true }, [
+		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: true }, [
 			{ data: [{ id: '1' }], pagination: { has_more: false, next_cursor: undefined } },
 		]);
 
-		const result = await beehiivListPagination.call(ctx as any, baseRequestOptions() as any);
+		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
 
 		expect(result).toEqual([{ json: { id: '1' } }]);
-		expect(ctx.helpers.httpRequestWithAuthentication.call).toHaveBeenCalledTimes(1);
+		expect(httpRequestMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('forwards the cursor from one page to the next request', async () => {
-		const ctx = fakePaginationContext({ returnAll: true }, [
+		const { ctx, calls } = fakePaginationContext({ returnAll: true }, [
 			{ data: [{ id: '1' }], pagination: { has_more: true, next_cursor: 'cursor-abc' } },
 			{ data: [], pagination: { has_more: false } },
 		]);
 
-		await beehiivListPagination.call(ctx as any, baseRequestOptions() as any);
+		await beehiivListPagination.call(ctx, baseRequestOptions());
 
-		const secondCallArgs = ctx.helpers.httpRequestWithAuthentication.call.mock.calls[1] as any[];
-		expect(secondCallArgs[2].qs.cursor).toBe('cursor-abc');
+		const secondCallOptions = calls[1][2] as unknown as IHttpRequestOptions;
+		expect(secondCallOptions.qs?.cursor).toBe('cursor-abc');
 	});
 });
 
 describe('mergeAdditionalFields', () => {
 	it('merges only the fields present in the collection param into the body', async () => {
 		const ctx = fakeExecuteSingleContext({ additionalFields: { subtitle: 'Hi', draft: true } });
-		const requestOptions = { body: { title: 'Post' } } as any;
+		const requestOptions = fakeRequestOptions({ title: 'Post' });
 
-		const result = await mergeAdditionalFields('additionalFields').call(ctx as any, requestOptions);
+		const result = await mergeAdditionalFields('additionalFields').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ title: 'Post', subtitle: 'Hi', draft: true });
 	});
 
 	it('leaves the body unchanged when the collection is empty', async () => {
 		const ctx = fakeExecuteSingleContext({});
-		const requestOptions = { body: { title: 'Post' } } as any;
+		const requestOptions = fakeRequestOptions({ title: 'Post' });
 
-		const result = await mergeAdditionalFields('additionalFields').call(ctx as any, requestOptions);
+		const result = await mergeAdditionalFields('additionalFields').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ title: 'Post' });
 	});
@@ -104,27 +122,27 @@ describe('mergeAdditionalFields', () => {
 describe('parseJsonBodyField', () => {
 	it('parses a JSON string parameter into a real array on the body', async () => {
 		const ctx = fakeExecuteSingleContext({ subscriptions: '[{"email":"a@b.com"}]' });
-		const requestOptions = { body: {} } as any;
+		const requestOptions = fakeRequestOptions({});
 
-		const result = await parseJsonBodyField('subscriptions').call(ctx as any, requestOptions);
+		const result = await parseJsonBodyField('subscriptions').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ subscriptions: [{ email: 'a@b.com' }] });
 	});
 
 	it('passes an already-parsed value through untouched', async () => {
 		const ctx = fakeExecuteSingleContext({ subscriptions: [{ email: 'a@b.com' }] });
-		const requestOptions = { body: {} } as any;
+		const requestOptions = fakeRequestOptions({});
 
-		const result = await parseJsonBodyField('subscriptions').call(ctx as any, requestOptions);
+		const result = await parseJsonBodyField('subscriptions').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ subscriptions: [{ email: 'a@b.com' }] });
 	});
 
 	it('writes under a different body key when one is given', async () => {
 		const ctx = fakeExecuteSingleContext({ bulkUpdateItems: '[{"subscription_id":"s1"}]' });
-		const requestOptions = { body: {} } as any;
+		const requestOptions = fakeRequestOptions({});
 
-		const result = await parseJsonBodyField('bulkUpdateItems', 'subscriptions').call(ctx as any, requestOptions);
+		const result = await parseJsonBodyField('bulkUpdateItems', 'subscriptions').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ subscriptions: [{ subscription_id: 's1' }] });
 	});
@@ -133,18 +151,18 @@ describe('parseJsonBodyField', () => {
 describe('parseBodyJsonStrings', () => {
 	it('parses a JSON string already merged into the body', async () => {
 		const ctx = fakeExecuteSingleContext({});
-		const requestOptions = { body: { blocks: '[{"type":"paragraph"}]' } } as any;
+		const requestOptions = fakeRequestOptions({ blocks: '[{"type":"paragraph"}]' });
 
-		const result = await parseBodyJsonStrings('blocks').call(ctx as any, requestOptions);
+		const result = await parseBodyJsonStrings('blocks').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ blocks: [{ type: 'paragraph' }] });
 	});
 
 	it('does nothing when the key is absent', async () => {
 		const ctx = fakeExecuteSingleContext({});
-		const requestOptions = { body: { title: 'Post' } } as any;
+		const requestOptions = fakeRequestOptions({ title: 'Post' });
 
-		const result = await parseBodyJsonStrings('blocks').call(ctx as any, requestOptions);
+		const result = await parseBodyJsonStrings('blocks').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ title: 'Post' });
 	});
@@ -153,9 +171,9 @@ describe('parseBodyJsonStrings', () => {
 describe('splitCommaList', () => {
 	it('trims whitespace and drops empty entries', async () => {
 		const ctx = fakeExecuteSingleContext({ tags: 'newsletter,  vip ,,launch' });
-		const requestOptions = { body: {} } as any;
+		const requestOptions = fakeRequestOptions({});
 
-		const result = await splitCommaList('tags').call(ctx as any, requestOptions);
+		const result = await splitCommaList('tags').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ tags: ['newsletter', 'vip', 'launch'] });
 	});
@@ -178,9 +196,9 @@ describe('mapTierPrices', () => {
 				],
 			},
 		});
-		const requestOptions = { body: { name: 'Premium' } } as any;
+		const requestOptions = fakeRequestOptions({ name: 'Premium' });
 
-		const result = await mapTierPrices().call(ctx as any, requestOptions);
+		const result = await mapTierPrices().call(ctx, requestOptions);
 
 		expect(result.body).toEqual({
 			name: 'Premium',
@@ -200,9 +218,9 @@ describe('mapTierPrices', () => {
 
 	it('omits prices_attributes entirely when no price rows were added', async () => {
 		const ctx = fakeExecuteSingleContext({ pricesAttributes: {} });
-		const requestOptions = { body: { name: 'Free' } } as any;
+		const requestOptions = fakeRequestOptions({ name: 'Free' });
 
-		const result = await mapTierPrices().call(ctx as any, requestOptions);
+		const result = await mapTierPrices().call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ name: 'Free' });
 	});
@@ -213,9 +231,9 @@ describe('mapTierPrices', () => {
 				fields: [{ id: 'price_123', currency: 'usd', amountCents: 500, interval: 'month', delete: true }],
 			},
 		});
-		const requestOptions = { body: {} } as any;
+		const requestOptions = fakeRequestOptions({});
 
-		const result = await mapTierPrices().call(ctx as any, requestOptions);
+		const result = await mapTierPrices().call(ctx, requestOptions);
 
 		expect(result.body).toEqual({
 			prices_attributes: [

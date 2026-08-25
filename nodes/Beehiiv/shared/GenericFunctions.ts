@@ -33,8 +33,9 @@ export async function beehiivListPagination(
 
 	const aggregated: INodeExecutionData[] = [];
 	let cursor: string | undefined;
+	let hasMorePages = true;
 
-	do {
+	while (hasMorePages) {
 		const pageSize = Math.max(1, Math.min(100, limit - aggregated.length));
 		const options = {
 			...requestOptions.options,
@@ -58,8 +59,8 @@ export async function beehiivListPagination(
 		}
 
 		cursor = response.pagination?.next_cursor;
-		if (aggregated.length >= limit || !response.pagination?.has_more || !cursor) break;
-	} while (true);
+		hasMorePages = aggregated.length < limit && !!response.pagination?.has_more && !!cursor;
+	}
 
 	return aggregated;
 }

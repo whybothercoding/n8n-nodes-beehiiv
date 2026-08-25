@@ -155,13 +155,13 @@ export const customFieldDescription: INodeProperties[] = [
 		name: 'kind',
 		type: 'options',
 		options: [
-			{ name: 'String', value: 'string' },
-			{ name: 'Integer', value: 'integer' },
-			{ name: 'Double', value: 'double' },
 			{ name: 'Boolean', value: 'boolean' },
 			{ name: 'Date', value: 'date' },
 			{ name: 'Datetime', value: 'datetime' },
+			{ name: 'Double', value: 'double' },
+			{ name: 'Integer', value: 'integer' },
 			{ name: 'List', value: 'list' },
+			{ name: 'String', value: 'string' },
 		],
 		required: true,
 		displayOptions: {
