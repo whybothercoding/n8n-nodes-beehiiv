@@ -9,7 +9,7 @@ import {
 export class BeehiivApi implements ICredentialType {
 	name = 'beehiivApi';
 	displayName = 'Beehiiv API';
-	documentationUrl = 'https://developers.beehiiv.com/docs/api/v2';
+	documentationUrl = 'https://developers.beehiiv.com/api-reference';
 	icon: Icon = 'file:../icons/beehiiv.svg';
 
 	properties: INodeProperties[] = [

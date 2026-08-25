@@ -169,19 +169,19 @@ export const postDescription: INodeProperties[] = [
 		},
 		options: [
 			{
+				displayName: 'Blocks (JSON)',
+				name: 'blocks',
+				type: 'json',
+				default: '',
+				description: 'Advanced: structured content blocks array, as documented by the Beehiiv API. Alternative to Body Content (HTML) below.',
+			},
+			{
 				displayName: 'Body Content (HTML)',
 				name: 'body_content',
 				type: 'string',
 				typeOptions: { rows: 5 },
 				default: '',
-				description: 'Raw HTML content for the post. Alternative to Blocks (JSON) below — Beehiiv accepts one or the other.',
-			},
-			{
-				displayName: 'Blocks (JSON)',
-				name: 'blocks',
-				type: 'json',
-				default: '',
-				description: 'Advanced: structured content blocks array, as documented by the Beehiiv API. Alternative to Body Content (HTML).',
+				description: 'Raw HTML content for the post. Alternative to Blocks (JSON) above — Beehiiv accepts one or the other.',
 			},
 		],
 	},

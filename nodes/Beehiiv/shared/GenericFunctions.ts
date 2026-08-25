@@ -1,3 +1,4 @@
+import { NodeOperationError } from 'n8n-workflow';
 import type {
 	DeclarativeRestApiSettings,
 	IDataObject,
@@ -118,7 +119,16 @@ export const mergeAdditionalFields = (paramName: string): PreSendAction =>
 export const parseJsonBodyField = (paramName: string, bodyKey: string = paramName): PreSendAction =>
 	async function (this, requestOptions) {
 		const raw = this.getNodeParameter(paramName);
-		const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
+		let value: unknown = raw;
+		if (typeof raw === 'string') {
+			try {
+				value = JSON.parse(raw);
+			} catch (error) {
+				throw new NodeOperationError(this.getNode(), `Invalid JSON in "${paramName}": ${(error as Error).message}`, {
+					itemIndex: this.getItemIndex(),
+				});
+			}
+		}
 		requestOptions.body = { ...((requestOptions.body as IDataObject) ?? {}), [bodyKey]: value };
 		return requestOptions;
 	};
@@ -133,7 +143,13 @@ export const parseBodyJsonStrings = (...bodyKeys: string[]): PreSendAction =>
 		const body = (requestOptions.body as IDataObject) ?? {};
 		for (const key of bodyKeys) {
 			if (typeof body[key] === 'string') {
-				body[key] = JSON.parse(body[key] as string);
+				try {
+					body[key] = JSON.parse(body[key] as string);
+				} catch (error) {
+					throw new NodeOperationError(this.getNode(), `Invalid JSON in "${key}": ${(error as Error).message}`, {
+						itemIndex: this.getItemIndex(),
+					});
+				}
 			}
 		}
 		requestOptions.body = body;

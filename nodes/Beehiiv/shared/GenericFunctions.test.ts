@@ -1,9 +1,11 @@
+import { NodeOperationError } from 'n8n-workflow';
 import type {
 	DeclarativeRestApiSettings,
 	IDataObject,
 	IExecutePaginationFunctions,
 	IExecuteSingleFunctions,
 	IHttpRequestOptions,
+	INode,
 } from 'n8n-workflow';
 import {
 	beehiivListPagination,
@@ -16,10 +18,14 @@ import {
 
 type ParamMap = Record<string, unknown>;
 
+const fakeNode = { name: 'Beehiiv', type: 'n8n-nodes-beehiiv.beehiiv' } as unknown as INode;
+
 function fakeExecuteSingleContext(params: ParamMap): IExecuteSingleFunctions {
 	return {
 		getNodeParameter: (name: string, fallback?: unknown) =>
 			name in params ? params[name] : fallback,
+		getNode: () => fakeNode,
+		getItemIndex: () => 0,
 	} as unknown as IExecuteSingleFunctions;
 }
 
@@ -146,6 +152,15 @@ describe('parseJsonBodyField', () => {
 
 		expect(result.body).toEqual({ subscriptions: [{ subscription_id: 's1' }] });
 	});
+
+	it('throws a NodeOperationError instead of a raw SyntaxError on malformed JSON', async () => {
+		const ctx = fakeExecuteSingleContext({ subscriptions: '{not valid json' });
+		const requestOptions = fakeRequestOptions({});
+
+		await expect(parseJsonBodyField('subscriptions').call(ctx, requestOptions)).rejects.toThrow(
+			NodeOperationError,
+		);
+	});
 });
 
 describe('parseBodyJsonStrings', () => {
@@ -165,6 +180,15 @@ describe('parseBodyJsonStrings', () => {
 		const result = await parseBodyJsonStrings('blocks').call(ctx, requestOptions);
 
 		expect(result.body).toEqual({ title: 'Post' });
+	});
+
+	it('throws a NodeOperationError instead of a raw SyntaxError on malformed JSON', async () => {
+		const ctx = fakeExecuteSingleContext({});
+		const requestOptions = fakeRequestOptions({ blocks: '{not valid json' });
+
+		await expect(parseBodyJsonStrings('blocks').call(ctx, requestOptions)).rejects.toThrow(
+			NodeOperationError,
+		);
 	});
 });
 

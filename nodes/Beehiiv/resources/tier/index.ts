@@ -62,6 +62,9 @@ const pricesAttributesField: INodeProperties = {
 					type: 'boolean',
 					default: false,
 					description: 'Whether to delete this price (update only, requires Price ID)',
+					displayOptions: {
+						show: { '/operation': ['update'] },
+					},
 				},
 				{
 					displayName: 'Enabled',
@@ -264,14 +267,14 @@ export const tierDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Name',
-				name: 'name',
+				displayName: 'Description',
+				name: 'description',
 				type: 'string',
 				default: '',
 			},
 			{
-				displayName: 'Description',
-				name: 'description',
+				displayName: 'Name',
+				name: 'name',
 				type: 'string',
 				default: '',
 			},

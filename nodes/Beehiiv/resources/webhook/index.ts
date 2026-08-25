@@ -58,7 +58,7 @@ export const webhookDescription: INodeProperties[] = [
 						url: '=/publications/{{$parameter["publicationId"]}}/webhooks',
 						body: {
 							url: '={{$parameter["url"]}}',
-							event_types: '={{$parameter["eventTypes"]}}',
+							event_types: '={{$parameter["event_types"]}}',
 						},
 					},
 					send: {
@@ -177,7 +177,7 @@ export const webhookDescription: INodeProperties[] = [
 	},
 	{
 		displayName: 'Event Types',
-		name: 'eventTypes',
+		name: 'event_types',
 		type: 'multiOptions',
 		options: eventTypeOptions,
 		required: true,
@@ -219,18 +219,18 @@ export const webhookDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Event Types',
-				name: 'event_types',
-				type: 'multiOptions',
-				options: eventTypeOptions,
-				default: [],
-			},
-			{
 				displayName: 'Description',
 				name: 'description',
 				type: 'string',
 				default: '',
 				description: 'A description of the webhook',
+			},
+			{
+				displayName: 'Event Types',
+				name: 'event_types',
+				type: 'multiOptions',
+				options: eventTypeOptions,
+				default: [],
 			},
 		],
 	},

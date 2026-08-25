@@ -150,7 +150,7 @@ export const subscriptionDescription: INodeProperties[] = [
 				routing: {
 					request: {
 						method: 'PUT',
-						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["emailToUpdate"])}}',
+						url: '=/publications/{{$parameter["publicationId"]}}/subscriptions/by_email/{{encodeURIComponent($parameter["email"])}}',
 						body: {
 							custom_fields: '={{$parameter["customFields"]["fields"]}}',
 						},
@@ -285,7 +285,7 @@ export const subscriptionDescription: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ['subscription'],
-				operation: ['create', 'getByEmail'],
+				operation: ['create', 'getByEmail', 'updateByEmail'],
 			},
 		},
 		default: '',
@@ -364,13 +364,6 @@ export const subscriptionDescription: INodeProperties[] = [
 				default: '',
 			},
 			{
-				displayName: 'Unsubscribe',
-				name: 'unsubscribe',
-				type: 'boolean',
-				default: false,
-				description: 'Whether to unsubscribe the user',
-			},
-			{
 				displayName: 'Tier',
 				name: 'tier',
 				type: 'options',
@@ -380,21 +373,16 @@ export const subscriptionDescription: INodeProperties[] = [
 				],
 				default: 'free',
 			},
+			{
+				displayName: 'Unsubscribe',
+				name: 'unsubscribe',
+				type: 'boolean',
+				default: false,
+				description: 'Whether to unsubscribe the user',
+			},
 		],
 	},
 	customFieldsField,
-	{
-		displayName: 'Email to Update',
-		name: 'emailToUpdate',
-		type: 'string',
-		placeholder: 'name@email.com',
-		required: true,
-		displayOptions: {
-			show: { resource: ['subscription'], operation: ['updateByEmail'] },
-		},
-		default: '',
-		description: 'The email address of the subscriber to update',
-	},
 	{
 		displayName: 'Tags',
 		name: 'tags',
