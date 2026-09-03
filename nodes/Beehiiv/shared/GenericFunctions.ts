@@ -9,21 +9,19 @@ import type {
 	PreSendAction,
 } from 'n8n-workflow';
 
-interface BeehiivPaginationMeta {
+interface BeehiivListResponse {
+	data?: IDataObject[];
 	has_more?: boolean;
 	next_cursor?: string;
 }
 
-interface BeehiivListResponse {
-	data?: IDataObject[];
-	pagination?: BeehiivPaginationMeta;
-}
-
 /**
- * Beehiiv wraps every list response as `{ data: [...], pagination: { has_more, next_cursor } }`
- * (cursor-based pagination, capped at limit=100/page). This walks pages until either the
- * caller's Limit is reached or the API reports no more pages, returning one n8n item per record
- * instead of a single item holding the whole envelope.
+ * Beehiiv wraps every list response as `{ data: [...], has_more, next_cursor }` — these
+ * pagination fields are flat siblings of `data`, NOT nested under a "pagination" key
+ * (verified against https://developers.beehiiv.com/api-reference/subscriptions/index and
+ * .../posts/index, 2026-09-03; cursor-based pagination, capped at limit=100/page). This walks
+ * pages until either the caller's Limit is reached or the API reports no more pages, returning
+ * one n8n item per record instead of a single item holding the whole envelope.
  */
 export async function beehiivListPagination(
 	this: IExecutePaginationFunctions,
@@ -59,8 +57,8 @@ export async function beehiivListPagination(
 			if (aggregated.length >= limit) break;
 		}
 
-		cursor = response.pagination?.next_cursor;
-		hasMorePages = aggregated.length < limit && !!response.pagination?.has_more && !!cursor;
+		cursor = response.next_cursor;
+		hasMorePages = aggregated.length < limit && !!response.has_more && !!cursor;
 	}
 
 	return aggregated;

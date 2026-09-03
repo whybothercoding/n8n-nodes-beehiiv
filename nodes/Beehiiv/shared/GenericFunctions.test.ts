@@ -60,8 +60,8 @@ describe('beehiivListPagination', () => {
 
 	it('walks every page and flattens each record into its own item', async () => {
 		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: true }, [
-			{ data: [{ id: '1' }, { id: '2' }], pagination: { has_more: true, next_cursor: 'c1' } },
-			{ data: [{ id: '3' }], pagination: { has_more: false } },
+			{ data: [{ id: '1' }, { id: '2' }], has_more: true, next_cursor: 'c1' },
+			{ data: [{ id: '3' }], has_more: false },
 		]);
 
 		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
@@ -72,7 +72,7 @@ describe('beehiivListPagination', () => {
 
 	it('stops as soon as the requested limit is reached, even mid-page', async () => {
 		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: false, limit: 2 }, [
-			{ data: [{ id: '1' }, { id: '2' }, { id: '3' }], pagination: { has_more: true, next_cursor: 'c1' } },
+			{ data: [{ id: '1' }, { id: '2' }, { id: '3' }], has_more: true, next_cursor: 'c1' },
 		]);
 
 		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
@@ -83,7 +83,7 @@ describe('beehiivListPagination', () => {
 
 	it('stops when the API reports no further pages', async () => {
 		const { ctx, httpRequestMock } = fakePaginationContext({ returnAll: true }, [
-			{ data: [{ id: '1' }], pagination: { has_more: false, next_cursor: undefined } },
+			{ data: [{ id: '1' }], has_more: false, next_cursor: undefined },
 		]);
 
 		const result = await beehiivListPagination.call(ctx, baseRequestOptions());
@@ -94,8 +94,8 @@ describe('beehiivListPagination', () => {
 
 	it('forwards the cursor from one page to the next request', async () => {
 		const { ctx, calls } = fakePaginationContext({ returnAll: true }, [
-			{ data: [{ id: '1' }], pagination: { has_more: true, next_cursor: 'cursor-abc' } },
-			{ data: [], pagination: { has_more: false } },
+			{ data: [{ id: '1' }], has_more: true, next_cursor: 'cursor-abc' },
+			{ data: [], has_more: false },
 		]);
 
 		await beehiivListPagination.call(ctx, baseRequestOptions());

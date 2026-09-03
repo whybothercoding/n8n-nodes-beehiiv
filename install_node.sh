@@ -49,12 +49,18 @@
 # Usage:   ./install_node.sh [path-to-tarball]
 # Override the target user/directory with N8N_USER / N8N_NODES_DIR env vars,
 # e.g.: N8N_USER=n8n N8N_NODES_DIR=/home/n8n/.n8n/nodes ./install_node.sh
+#
+# Generalized 2026-09-03 (PACKAGE_NAME env var) so this script can be reused
+# verbatim by any other @indiegoweb/n8n-nodes-* package shipping to the same
+# VPS the same way — defaults preserve this package's exact prior behavior.
+# Canonical copy: ~/Documents/systems/n8n-node-package-skeleton/reference/install_node.sh
 set -e
 
 N8N_USER="${N8N_USER:-$(whoami)}"
 N8N_NODES_DIR="${N8N_NODES_DIR:-$HOME/.n8n/nodes}"
 NODE_MODULES_DIR="$N8N_NODES_DIR/node_modules"
-INSTALL_DIR="$NODE_MODULES_DIR/@indiegoweb/n8n-nodes-beehiiv"
+PACKAGE_NAME="${PACKAGE_NAME:-@indiegoweb/n8n-nodes-beehiiv}"
+INSTALL_DIR="$NODE_MODULES_DIR/$PACKAGE_NAME"
 TARBALL="${1:-/tmp/n8n-nodes-beehiiv.tar.gz}"
 
 echo "Creating directory: $NODE_MODULES_DIR"
