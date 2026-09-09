@@ -1,7 +1,11 @@
 # n8n-nodes-beehiiv
 
 [![CI](https://github.com/whybothercoding/n8n-nodes-beehiiv/actions/workflows/ci.yml/badge.svg)](https://github.com/whybothercoding/n8n-nodes-beehiiv/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/%40indiegoweb%2Fn8n-nodes-beehiiv.svg)](https://www.npmjs.com/package/@indiegoweb/n8n-nodes-beehiiv)
+[![npm provenance](https://img.shields.io/badge/npm%20provenance-verified-brightgreen)](https://www.npmjs.com/package/@indiegoweb/n8n-nodes-beehiiv)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
+
+Published via npm's [OIDC trusted publishing](https://docs.npmjs.com/generating-provenance-statements) — every release is built and published from GitHub Actions with a verifiable provenance attestation, no long-lived npm token ever stored. See the **Provenance** tab on the [npm package page](https://www.npmjs.com/package/@indiegoweb/n8n-nodes-beehiiv).
 
 This is an n8n community node. It lets you use [Beehiiv](https://www.beehiiv.com/) — the newsletter and publishing platform — in your n8n workflows: manage subscriptions, posts, tiers, segments, automations, webhooks, custom fields, and referral programs against the Beehiiv API v2.
 
