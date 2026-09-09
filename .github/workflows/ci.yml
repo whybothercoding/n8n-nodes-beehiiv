@@ -6,17 +6,33 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # engines.node is a permissive floor (added 2026-09-09, ">=20.0.0") —
+        # this package is loaded by whatever Node major the live self-hosted
+        # n8n Docker image bundles, not a version this repo controls. Matrix
+        # still exercises that floor through current LTS, matching
+        # n8n-nodes-freedom24's existing pattern.
+        node-version: ['20.x', '24.x']
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: Update npm
