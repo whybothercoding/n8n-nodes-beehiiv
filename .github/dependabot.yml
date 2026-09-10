@@ -19,3 +19,19 @@ updates:
         patterns: ["*"]
     commit-message:
       prefix: "chore"
+    # Deviates from systems/github-ci's golden dependabot.yml reference
+    # (flat group, no ignore) -- registered as drift in that system's
+    # variants.yaml (dependabot_major_ignore), same pattern mindmath-react
+    # already uses. Both confirmed broken locally 2026-09-10, not assumed:
+    # typescript 5->7 -- ts-jest@29.4.12 (their actual latest release)
+    # hard-caps its peer range at ">=4.3 <7", nothing newer exists yet;
+    # eslint 9->10 -- eslint-plugin-n8n-nodes-base (n8n's own lint plugin,
+    # wrapped by `n8n-node lint`) calls the removed `context.getFilename()`
+    # API and crashes outright. Scoped to just these two rather than a
+    # blanket "*" ignore -- no evidence any other dependency's majors are
+    # unsafe here.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
