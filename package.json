@@ -1,6 +1,6 @@
 {
 	"name": "@indiegoweb/n8n-nodes-beehiiv",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"description": "n8n node for Beehiiv API",
 	"license": "MIT",
 	"homepage": "https://github.com/whybothercoding/n8n-nodes-beehiiv",
